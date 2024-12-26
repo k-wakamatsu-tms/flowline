@@ -28,7 +28,28 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
+// Define the type for a navigation item
+interface NavItem {
+  title: string;
+  url: string;
+  icon: React.ComponentType<any>;
+  items?: { title: string; url: string }[];
+}
+
+// Define the type for the data structure
+interface SidebarData {
+  user: {
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  navMain: NavItem[];
+  navSecondary: NavItem[];
+  projects: { name: string; url: string; icon: React.ComponentType<any> }[];
+}
+
+
+const data: SidebarData = {
   user: {
     name: "shadcn",
     email: "m@example.com",
@@ -37,86 +58,85 @@ const data = {
   navMain: [
     {
       title: "Playground",
-      url: "#",
+      url: "/app",
       icon: SquareTerminal,
-      isActive: true,
       items: [
         {
           title: "History",
-          url: "#",
+          url: "/app/history",
         },
         {
           title: "Starred",
-          url: "#",
+          url: "/app/starred",
         },
         {
           title: "Settings",
-          url: "#",
+          url: "/app/settings",
         },
       ],
     },
     {
       title: "Models",
-      url: "#",
+      url: "/app/models",
       icon: Bot,
       items: [
         {
           title: "Genesis",
-          url: "#",
+          url: "/app/models/genesis",
         },
         {
           title: "Explorer",
-          url: "#",
+          url: "/app/models/explorer",
         },
         {
           title: "Quantum",
-          url: "#",
+          url: "/app/models/quantum",
         },
       ],
     },
     {
       title: "Documentation",
-      url: "#",
+      url: "/app/documentation",
       icon: BookOpen,
       items: [
         {
           title: "Introduction",
-          url: "#",
+          url: "/app/documentation/introduction",
         },
         {
           title: "Get Started",
-          url: "#",
+          url: "/app/documentation/get-started",
         },
         {
           title: "Tutorials",
-          url: "#",
+          url: "/app/documentation/tutorials",
         },
         {
           title: "Changelog",
-          url: "#",
+          url: "/app/documentation/changelog",
         },
       ],
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/app/settings",
       icon: Settings2,
       items: [
         {
           title: "General",
-          url: "#",
+          url: "/app/settings/general",
         },
         {
           title: "Team",
-          url: "#",
+          url: "/app/settings/team",
         },
         {
           title: "Billing",
-          url: "#",
+          url: "/app/settings/billing",
         },
         {
           title: "Limits",
-          url: "#",
+          url: "/app/settings/limits",
         },
       ],
     },
@@ -124,29 +144,29 @@ const data = {
   navSecondary: [
     {
       title: "Support",
-      url: "#",
+      url: "/app/support",
       icon: LifeBuoy,
     },
     {
       title: "Feedback",
-      url: "#",
+      url: "/app/feedback",
       icon: Send,
     },
   ],
   projects: [
     {
       name: "Design Engineering",
-      url: "#",
+      url: "/app/workspaces/1/projects/1",
       icon: Frame,
     },
     {
       name: "Sales & Marketing",
-      url: "#",
+      url: "/app/workspaces/1/projects/2",
       icon: PieChart,
     },
     {
       name: "Travel",
-      url: "#",
+      url: "/app/workspaces/1/projects/3",
       icon: Map,
     },
   ],

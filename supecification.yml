@@ -1,0 +1,495 @@
+application:
+  name: TaskMaster
+  description: チームのタスク管理とコラボレーションを効率化するアプリケーション
+
+features:
+  # ワークスペース管理
+  workspaces:
+    create:
+      description: 新しいワークスペースを作成する
+      fields:
+        - name: name
+          type: string
+          required: true
+          description: ワークスペース名
+        - name: description
+          type: text
+          description: ワークスペースの説明
+        - name: members
+          type: array
+          items:
+            type: user_id
+          description: ワークスペースメンバーのユーザーIDリスト
+    read:
+      description: ワークスペースの詳細情報を閲覧する
+    update:
+      description: ワークスペース情報を更新する
+      fields:
+        - name: name
+          type: string
+        - name: description
+          type: text
+        - name: members
+          type: array
+          items:
+            type: user_id
+    delete:
+      description: ワークスペースを削除する
+    invite_member:
+      description: ワークスペースにメンバーを招待する
+      fields:
+        - name: user_id
+          type: user_id
+          required: true
+          description: 招待するユーザーのID
+
+  # プロジェクト管理
+  projects:
+    create:
+      description: 新しいプロジェクトを作成する
+      fields:
+        - name: name
+          type: string
+          required: true
+          description: プロジェクト名
+        - name: description
+          type: text
+          description: プロジェクトの説明
+        - name: workspace_id
+          type: workspace_id
+          required: true
+          description: 所属するワークスペースのID
+        - name: members
+          type: array
+          items:
+            type: user_id
+          description: プロジェクトメンバーのユーザーIDリスト
+        - name: due_date
+          type: date
+          description: プロジェクトの期日
+        - name: status
+          type: enum
+          values: ["未着手", "進行中", "完了", "保留"]
+          default: "未着手"
+          description: プロジェクトのステータス
+    read:
+      description: プロジェクトの詳細情報を閲覧する
+    update:
+      description: プロジェクト情報を更新する
+      fields:
+        - name: name
+          type: string
+        - name: description
+        - name: members
+          type: array
+          items:
+            type: user_id
+        - name: due_date
+          type: date
+        - name: status
+          type: enum
+          values: ["未着手", "進行中", "完了", "保留"]
+    delete:
+      description: プロジェクトを削除する
+
+  # タスク管理
+  tasks:
+    create:
+      description: 新しいタスクを作成する
+      fields:
+        - name: name
+          type: string
+          required: true
+          description: タスク名
+        - name: description
+          type: text
+          description: タスクの説明
+        - name: project_id
+          type: project_id
+          required: true
+          description: 所属するプロジェクトのID
+        - name: assignee_id
+          type: user_id
+          description: 担当者のユーザーID
+        - name: due_date
+          type: date
+          description: タスクの期日
+        - name: priority
+          type: enum
+          values: ["高", "中", "低"]
+          default: "中"
+          description: タスクの優先度
+        - name: status
+          type: enum
+          values: ["未着手", "進行中", "レビュー待ち", "完了", "保留"]
+          default: "未着手"
+          description: タスクのステータス
+        - name: tags
+          type: array
+          items:
+            type: string
+          description: タグのリスト
+        - name: parent_task_id
+          type: task_id
+          description: 親タスクのID（サブタスクの場合）
+    read:
+      description: タスクの詳細情報を閲覧する
+    update:
+      description: タスク情報を更新する
+      fields:
+        - name: name
+          type: string
+        - name: description
+        - name: assignee_id
+          type: user_id
+        - name: due_date
+          type: date
+        - name: priority
+          type: enum
+          values: ["高", "中", "低"]
+        - name: status
+          type: enum
+          values: ["未着手", "進行中", "レビュー待ち", "完了", "保留"]
+        - name: tags
+          type: array
+          items:
+            type: string
+        - name: parent_task_id
+          type: task_id
+    delete:
+      description: タスクを削除する
+
+  # セクション/カラム
+  sections:
+    create:
+      description: プロジェクト内に新しいセクション/カラムを作成する (例: To Do, In Progress, Done)
+      fields:
+        - name: name
+          type: string
+          required: true
+          description: セクション名
+        - name: project_id
+          type: project_id
+          required: true
+          description: 所属するプロジェクトのID
+        - name: order
+          type: integer
+          description: 表示順序
+    read:
+      description: セクション/カラムの詳細情報を閲覧する
+    update:
+      description: セクション/カラム情報を更新する
+      fields:
+        - name: name
+          type: string
+        - name: order
+          type: integer
+    delete:
+      description: セクション/カラムを削除する
+
+  # タグ
+  tags:
+    create:
+      description: 新しいタグを作成する
+      fields:
+        - name: name
+          type: string
+          required: true
+          description: タグ名
+        - name: color
+          type: string
+          description: タグの色 (例: #FF0000)
+    read:
+      description: タグの詳細情報を閲覧する
+    update:
+      description: タグ情報を更新する
+      fields:
+        - name: name
+          type: string
+        - name: color
+          type: string
+    delete:
+      description: タグを削除する
+
+  # コメント
+  comments:
+    create:
+      description: タスクにコメントを追加する
+      fields:
+        - name: task_id
+          type: task_id
+          required: true
+          description: コメントするタスクのID
+        - name: user_id
+          type: user_id
+          required: true
+          description: コメントしたユーザーのID
+        - name: content
+          type: text
+          required: true
+          description: コメント内容
+        - name: timestamp
+          type: datetime
+          readOnly: true
+          description: コメント日時
+    read:
+      description: タスクのコメントを閲覧する
+    update:
+      description: 自分のコメントを編集する
+      fields:
+        - name: content
+          type: text
+    delete:
+      description: 自分のコメントを削除する
+
+  # ファイル添付
+  attachments:
+    create:
+      description: タスクにファイルを添付する
+      fields:
+        - name: task_id
+          type: task_id
+          required: true
+          description: ファイルを添付するタスクのID
+        - name: user_id
+          type: user_id
+          required: true
+          description: アップロードしたユーザーのID
+        - name: file_name
+          type: string
+          required: true
+          description: ファイル名
+        - name: file_url
+          type: url
+          readOnly: true
+          description: ファイルのURL
+        - name: upload_timestamp
+          type: datetime
+          readOnly: true
+          description: アップロード日時
+    read:
+      description: タスクに添付されたファイルを閲覧する
+    delete:
+      description: 添付ファイルを削除する
+
+  # ユーザー管理 (NextAuthで管理するため、ここではReadのみ)
+  users:
+    read:
+      description: ユーザーの詳細情報を閲覧する (NextAuth経由)
+
+  # 通知
+  notifications:
+    read:
+      description: ユーザーの通知を閲覧する
+    mark_as_read:
+      description: 通知を既読にする
+
+  # 検索
+  search:
+    description: プロジェクトやタスクをキーワードで検索する
+
+user_roles:
+  admin:
+    permissions:
+      - "workspaces:create"
+      - "workspaces:read"
+      - "workspaces:update"
+      - "workspaces:delete"
+      - "workspaces:invite_member"
+      - "projects:create"
+      - "projects:read"
+      - "projects:update"
+      - "projects:delete"
+      - "tasks:create"
+      - "tasks:read"
+      - "tasks:update"
+      - "tasks:delete"
+      - "sections:create"
+      - "sections:read"
+      - "sections:update"
+      - "sections:delete"
+      - "tags:create"
+      - "tags:read"
+      - "tags:update"
+      - "tags:delete"
+      - "comments:create"
+      - "comments:read"
+      - "comments:update"
+      - "comments:delete"
+      - "attachments:create"
+      - "attachments:read"
+      - "attachments:delete"
+      - "users:read" # NextAuth経由での情報取得
+
+  workspace_member:
+    permissions:
+      - "workspaces:read"
+      - "projects:create"
+      - "projects:read"
+      - "projects:update"
+      - "projects:delete"
+      - "tasks:create"
+      - "tasks:read"
+      - "tasks:update"
+      - "tasks:delete"
+      - "sections:create"
+      - "sections:read"
+      - "sections:update"
+      - "sections:delete"
+      - "comments:create"
+      - "comments:read"
+      - "comments:update (own)" # 自分のコメントのみ
+      - "comments:delete (own)" # 自分のコメントのみ
+      - "attachments:create"
+      - "attachments:read"
+      - "attachments:delete (own)" # 自身がアップロードしたファイルのみ
+      - "users:read" # 同じワークスペースのメンバー情報
+
+data_models:
+  workspace:
+    fields:
+      - id: workspace_id
+      - name: string
+      - description: text
+      - created_at: datetime
+      - updated_at: datetime
+      - owner_id: user_id # 作成者
+
+  project:
+    fields:
+      - id: project_id
+      - workspace_id: workspace_id
+      - name: string
+      - description: text
+      - members: array (user_id)
+      - created_at: datetime
+      - updated_at: datetime
+      - due_date: date
+      - status: string
+
+  task:
+    fields:
+      - id: task_id
+      - name: string
+      - description: text
+      - project_id: project_id
+      - assignee_id: user_id
+      - created_at: datetime
+      - updated_at: datetime
+      - due_date: date
+      - priority: string
+      - status: string
+      - tags: array (string)
+      - parent_task_id: task_id
+
+  section:
+    fields:
+      - id: section_id
+      - name: string
+      - project_id: project_id
+      - order: integer
+
+  tag:
+    fields:
+      - id: tag_id
+      - name: string
+      - color: string
+
+  comment:
+    fields:
+      - id: comment_id
+      - task_id: task_id
+      - user_id: user_id
+      - content: text
+      - timestamp: datetime
+
+  attachment:
+    fields:
+      - id: attachment_id
+      - task_id: task_id
+      - user_id: user_id
+      - file_name: string
+      - file_url: url
+      - upload_timestamp: datetime
+
+  user: # NextAuthで管理されるユーザー情報
+    fields:
+      - id: user_id
+      - name: string
+      - email: email
+      - image: url # プロフィール画像など (NextAuthから取得)
+
+  workspace_member: # ユーザーとワークスペースの関連付け
+    fields:
+      - workspace_id: workspace_id
+      - user_id: user_id
+      - role: enum ["owner", "member"] # ワークスペース内での役割
+
+api_endpoints:
+  - /workspaces:
+      methods: [GET, POST]
+  - /workspaces/{workspace_id}:
+      methods: [GET, PUT, DELETE]
+  - /workspaces/{workspace_id}/invite:
+      methods: [POST]
+  - /workspaces/{workspace_id}/projects:
+      methods: [GET, POST]
+  - /projects/{project_id}:
+      methods: [GET, PUT, DELETE]
+  - /projects/{project_id}/tasks:
+      methods: [GET, POST]
+  - /tasks/{task_id}:
+      methods: [GET, PUT, DELETE]
+  - /tasks/{task_id}/comments:
+      methods: [GET, POST]
+  - /comments/{comment_id}:
+      methods: [PUT, DELETE]
+  - /tasks/{task_id}/attachments:
+      methods: [GET, POST]
+  - /attachments/{attachment_id}:
+      methods: [DELETE]
+  - /users/{user_id}: # ユーザー情報の取得 (NextAuth経由)
+      methods: [GET]
+  - /search:
+      methods: [GET]
+
+ui_components:
+  - WorkspaceSwitcher: ワークスペース切り替えコンポーネント
+  - ProjectList: プロジェクトリスト表示コンポーネント
+  - TaskList: タスクリスト表示コンポーネント
+  - ProjectBoard: プロジェクトボード（カンバン）表示コンポーネント
+  - TaskDetail: タスク詳細表示コンポーネント
+  - CommentSection: コメント表示・入力コンポーネント
+  - FileUpload: ファイルアップロードコンポーネント
+  - SearchBar: 検索バーコンポーネント
+  - NavigationMenu: ナビゲーションメニューコンポーネント
+
+front_page_urls:
+  # 認証なし
+  login: "/login"
+  signup: "/signup" # 必要に応じて
+
+  # 認証あり
+  app: "/app" # デフォルトのアプリケーションルート、通常はワークスペース選択画面
+  workspace: "/app/workspaces/[workspaceId]" # 特定のワークスペース
+  workspace_projects: "/app/workspaces/[workspaceId]/projects" # 特定のワークスペースのプロジェクト一覧
+  project: "/app/workspaces/[workspaceId]/projects/[projectId]" # 特定のプロジェクト
+  project_board: "/app/workspaces/[workspaceId]/projects/[projectId]/board" # プロジェクトのボード表示
+  project_list: "/app/workspaces/[workspaceId]/projects/[projectId]/list" # プロジェクトのリスト表示
+  task: "/app/workspaces/[workspaceId]/projects/[projectId]/tasks/[taskId]" # 特定のタスク
+  settings: "/app/settings" # 設定ページ
+  notifications: "/app/notifications" # 通知ページ
+  search_results: "/app/search?q=[query]" # 検索結果ページ
+
+technical_requirements:
+  language: "JavaScript (React/Next.js), Python (Django/Flask) など"
+  database: "PostgreSQL, MySQL など"
+  authentication: "NextAuth.js (Google OAuth)"
+  deployment: "Vercel, AWS, Google Cloud, Heroku など"
+
+future_enhancements:
+  - ガントチャート表示
+  - カレンダー表示
+  - 他のツールとの連携 (Slack, Google Calendar など)
+  - モバイルアプリ対応
+  - ワークフロー機能の強化
