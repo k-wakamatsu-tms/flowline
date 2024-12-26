@@ -1,5 +1,5 @@
 application:
-  name: TaskMaster
+  name: Flowline
   description: チームのタスク管理とコラボレーションを効率化するアプリケーション
 
 features:
@@ -162,7 +162,7 @@ features:
   # セクション/カラム
   sections:
     create:
-      description: プロジェクト内に新しいセクション/カラムを作成する (例: To Do, In Progress, Done)
+      description: プロジェクト内に新しいセクション/カラムを作成する
       fields:
         - name: name
           type: string
@@ -198,7 +198,7 @@ features:
           description: タグ名
         - name: color
           type: string
-          description: タグの色 (例: #FF0000)
+          description: タグの色
     read:
       description: タグの詳細情報を閲覧する
     update:
