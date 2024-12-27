@@ -7,7 +7,7 @@ import { api } from "@/trpc/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sidebar } from "@/components/ui/sidebar"
+import { Sidebar, SidebarFooter } from "@/components/ui/sidebar"
 import {
   HomeIcon,
   FolderIcon,
@@ -15,10 +15,19 @@ import {
   BellIcon,
   CogIcon,
 } from "lucide-react"
+import { NavUser } from "./nav-user"
+import { useSession } from "next-auth/react"
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const {data:session}=useSession()
   const { data: workspaces } = api.workspace.list.useQuery()
+
+  if (!session) {
+    return null;
+  }
+
+  const user = session.user
 
   return (
     <Sidebar>
@@ -73,6 +82,13 @@ export function AppSidebar() {
           </div>
         </div>
       </ScrollArea>
+      <SidebarFooter>
+        <NavUser user={{
+          name: user.name ?? "",
+          email: user.email ?? "",
+          image: user.image ?? "",
+        }} />
+      </SidebarFooter>
     </Sidebar>
   )
 }

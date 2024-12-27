@@ -19,16 +19,25 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { PlusIcon } from "lucide-react";
 
-export function CreateWorkspaceDialog() {
+interface CreateWorkspaceDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+}
+
+export function CreateWorkspaceDialog({
+  open,
+  onOpenChange,
+  trigger,
+}: CreateWorkspaceDialogProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
 
   const { mutate: createWorkspace, isPending } = api.workspace.create.useMutation({
     onSuccess: (workspace) => {
-      setOpen(false);
       setName("");
+      onOpenChange?.(false);
       router.push(`/app/workspaces/${workspace.id}`);
       toast({
         title: "ワークスペースを作成しました",
@@ -54,13 +63,17 @@ export function CreateWorkspaceDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusIcon className="w-4 h-4 mr-2" />
-          新規作成
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger ? (
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
+          <Button>
+            <PlusIcon className="w-4 h-4 mr-2" />
+            新規作成
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>ワークスペースの作成</DialogTitle>
@@ -84,7 +97,7 @@ export function CreateWorkspaceDialog() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => onOpenChange?.(false)}
               disabled={isPending}
             >
               キャンセル

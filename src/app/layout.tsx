@@ -1,12 +1,10 @@
-
 import "@/styles/globals.css";
 
 import { Inter } from "next/font/google";
-import { headers } from "next/headers";
 
-import { TRPCReactProvider } from "@/trpc/react";
-import { Providers } from "./providers";
-import { Metadata } from "next";
+import { type Metadata } from "next";
+import Providers from "@/components/layout/providers";
+import { auth } from "@/server/auth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,13 +17,14 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await auth();
   return (
     <html lang="ja" suppressHydrationWarning>
       <body className={`font-sans ${inter.variable}`}>
-        <Providers>{children}</Providers>
+        <Providers session={session}>{children}</Providers>
       </body>
     </html>
   );
