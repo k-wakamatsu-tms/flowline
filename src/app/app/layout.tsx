@@ -1,7 +1,7 @@
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import Header from "@/components/layout/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { SessionProvider } from "next-auth/react";
+import { HydrateClient } from "@/trpc/server";
 
 export default function AppLayout({
   children,
@@ -9,7 +9,7 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SessionProvider>
+    <HydrateClient>
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
@@ -17,6 +17,6 @@ export default function AppLayout({
           {children}
         </SidebarInset>
       </SidebarProvider>
-    </SessionProvider>
+    </HydrateClient>
   );
 }
