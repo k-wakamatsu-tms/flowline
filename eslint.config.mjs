@@ -9,51 +9,65 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
+  allConfig: js.configs.all,
 });
 
-
 // eslint-disable-next-line import/no-anonymous-default-export, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-export default [...compat.extends(
+export default [
+  // eslintrc の `extends` をそのまま再現
+  ...compat.extends(
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
-), {
+  ),
+  {
+    // plugins はオブジェクトとして登録
     plugins: {
-        "@typescript-eslint": typescriptEslint,
+      "@typescript-eslint": typescriptEslint,
     },
 
+    // parser や parserOptions は languageOptions にまとめる
     languageOptions: {
-        parser: tsParser,
-        ecmaVersion: 5,
-        sourceType: "script",
-
-        parserOptions: {
-            project: true,
-        },
+      parser: tsParser,
+      parserOptions: {
+        // "project": true を指定したい場合
+        // tsconfig.json を自動で検出させるなど、プロジェクトパスを明示する
+        // たとえば "project": "./tsconfig.json" のように書くこともできます
+        project: true,
+      },
     },
 
     rules: {
-        "@typescript-eslint/array-type": "off",
-        "@typescript-eslint/consistent-type-definitions": "off",
+      "@typescript-eslint/array-type": "off",
+      "@typescript-eslint/consistent-type-definitions": "off",
 
-        "@typescript-eslint/consistent-type-imports": ["warn", {
-            prefer: "type-imports",
-            fixStyle: "inline-type-imports",
-        }],
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
+        {
+          prefer: "type-imports",
+          fixStyle: "inline-type-imports",
+        },
+      ],
 
-        "@typescript-eslint/no-unused-vars": ["warn", {
-            argsIgnorePattern: "^_",
-        }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+        },
+      ],
 
-        "@typescript-eslint/require-await": "off",
+      "@typescript-eslint/require-await": "off",
 
-        "@typescript-eslint/no-misused-promises": ["error", {
-            checksVoidReturn: {
-                attributes: false,
-            },
-        }],
+      "@typescript-eslint/no-misused-promises": [
+        "error",
+        {
+          checksVoidReturn: {
+            attributes: false,
+          },
+        },
+      ],
     },
-}];
+  },
+];

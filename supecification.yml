@@ -104,10 +104,15 @@ features:
         - name: description
           type: text
           description: タスクの説明
-        - name: project_id
-          type: project_id
+        - name: projects
+          type: array
+          items:
+            type: project_id
           required: true
-          description: 所属するプロジェクトのID
+          description: 所属するプロジェクトのIDリスト
+        - name: section_id
+          type: section_id
+          description: 所属するセクションのID
         - name: assignee_id
           type: user_id
           description: 担当者のユーザーID
@@ -140,6 +145,13 @@ features:
         - name: name
           type: string
         - name: description
+          type: text
+        - name: projects
+          type: array
+          items:
+            type: project_id
+        - name: section_id
+          type: section_id
         - name: assignee_id
           type: user_id
         - name: due_date
@@ -175,6 +187,9 @@ features:
         - name: order
           type: integer
           description: 表示順序
+        - name: color
+          type: string
+          description: セクションの色
     read:
       description: セクション/カラムの詳細情報を閲覧する
     update:
@@ -184,8 +199,61 @@ features:
           type: string
         - name: order
           type: integer
+        - name: color
+          type: string
     delete:
       description: セクション/カラムを削除する
+
+  # プロジェクト表示設定
+  project_views:
+    create:
+      description: プロジェクトの新しい表示形式を作成する
+      fields:
+        - name: name
+          type: string
+          required: true
+          description: ビュー名（例：重要タスク一覧、進行中タスク）
+        - name: project_id
+          type: project_id
+          required: true
+          description: プロジェクトID
+        - name: type
+          type: enum
+          values: ["リスト", "ボード", "タイムライン", "ガント", "カレンダー"]
+          required: true
+          description: 表示形式の種類
+        - name: is_default
+          type: boolean
+          description: デフォルト表示として設定するか
+        - name: filters
+          type: object
+          description: タスクのフィルター設定
+        - name: sort
+          type: object
+          description: タスクのソート設定
+        - name: group_by
+          type: string
+          description: グループ化の設定
+    read:
+      description: プロジェクトの表示設定を取得する
+    update:
+      description: 表示設定を更新する
+    delete:
+      description: 表示設定を削除する
+
+  # マイタスク設定
+  my_tasks:
+    read:
+      description: 自分に割り当てられたすべてのタスクを取得する
+    update_view:
+      description: マイタスクの表示設定を更新する
+      fields:
+        - name: view_type
+          type: enum
+          values: ["リスト", "ボード", "タイムライン", "ガント", "カレンダー"]
+        - name: filters
+          type: object
+          description: タスクのフィルター設定
 
   # タグ
   tags:
@@ -372,7 +440,8 @@ data_models:
       - id: task_id
       - name: string
       - description: text
-      - project_id: project_id
+      - projects: array (project_id)
+      - section_id: section_id
       - assignee_id: user_id
       - created_at: datetime
       - updated_at: datetime
@@ -385,9 +454,12 @@ data_models:
   section:
     fields:
       - id: section_id
-      - name: string
       - project_id: project_id
+      - name: string
+      - color: string
       - order: integer
+      - created_at: datetime
+      - updated_at: datetime
 
   tag:
     fields:
@@ -425,6 +497,34 @@ data_models:
       - user_id: user_id
       - role: enum ["owner", "member"] # ワークスペース内での役割
 
+  project_view:
+    fields:
+      - id: view_id
+      - name: string
+      - project_id: project_id
+      - type: enum
+        values: ["リスト", "ボード", "タイムライン", "ガント", "カレンダー"]
+      - is_default: boolean
+      - filters: json
+      - sort: json
+      - group_by: string
+      - created_at: datetime
+      - updated_at: datetime
+
+  my_tasks_view:
+    fields:
+      - id: view_id
+      - user_id: user_id
+      - name: string
+      - type: enum
+        values: ["リスト", "ボード", "タイムライン", "ガント", "カレンダー"]
+      - is_default: boolean
+      - filters: json
+      - sort: json
+      - group_by: string
+      - created_at: datetime
+      - updated_at: datetime
+
 api_endpoints:
   - /workspaces:
       methods: [GET, POST]
@@ -452,6 +552,18 @@ api_endpoints:
       methods: [GET]
   - /search:
       methods: [GET]
+  - /projects/{project_id}/views:
+      methods: [GET, POST]
+  - /projects/{project_id}/views/{view_id}:
+      methods: [GET, PUT, DELETE]
+  - /projects/{project_id}/sections:
+      methods: [GET, POST, PUT, DELETE]
+  - /my-tasks:
+      methods: [GET]
+  - /my-tasks/settings:
+      methods: [GET, PUT]
+  - /tasks/{task_id}/projects:
+      methods: [GET, POST, DELETE]
 
 ui_components:
   - WorkspaceSwitcher: ワークスペース切り替えコンポーネント
@@ -464,32 +576,55 @@ ui_components:
   - SearchBar: 検索バーコンポーネント
   - NavigationMenu: ナビゲーションメニューコンポーネント
 
+  # ビューレイアウト関連
+  - ViewLayout:
+      description: プロジェクトビューとマイタスクで共通して使用するレイアウトコンポーネント
+      subComponents:
+        - ViewHeader: タイトルとアクションを表示するヘッダー
+        - ViewTabs: ビュー切り替えタブ
+        - ViewContent: タブ下のコンテンツ領域
+
+  # 各ビュータイプのコンテンツコンポーネント
+  - ViewContents:
+      description: 各ビュータイプのコンテンツコンポーネント
+      subComponents:
+        - OverviewContent: 概要表示用コンテンツ
+        - ListContent: リスト表示用コンテンツ
+        - BoardContent: ボード（カンバン）表示用コンテンツ
+        - TimelineContent: タイムライン表示用コンテンツ
+        - GanttContent: ガントチャート表示用コンテンツ
+        - CalendarContent: カレンダー表示用コンテンツ
+
+  # ビュー設定関連
+  - ViewSettings:
+      description: ビュー設定関連のコンポーネント
+      subComponents:
+        - ViewTypeSelector: 表示形式選択
+        - ViewFilterSettings: フィルター設定
+        - ViewSortSettings: ソート設定
+        - ViewLayoutSettings: レイアウト設定
+
 front_page_urls:
   # 認証なし
   login: "/login"
-  signup: "/signup" # 必要に応じて
+  signup: "/signup"
 
   # 認証あり
-  app: "/app" # デフォルトのアプリケーションルート、通常はワークスペース選択画面
-  workspace: "/app/workspaces/[workspaceId]" # 特定のワークスペース
-  workspace_projects: "/app/workspaces/[workspaceId]/projects" # 特定のワークスペースのプロジェクト一覧
-  project: "/app/workspaces/[workspaceId]/projects/[projectId]" # 特定のプロジェクト
-  project_board: "/app/workspaces/[workspaceId]/projects/[projectId]/board" # プロジェクトのボード表示
-  project_list: "/app/workspaces/[workspaceId]/projects/[projectId]/list" # プロジェクトのリスト表示
-  task: "/app/workspaces/[workspaceId]/projects/[projectId]/tasks/[taskId]" # 特定のタスク
-  settings: "/app/settings" # 設定ページ
-  notifications: "/app/notifications" # 通知ページ
-  search_results: "/app/search?q=[query]" # 検索結果ページ
+  app: "/app"
+  workspace: "/app/workspaces/[workspaceId]"
+  workspace_projects: "/app/workspaces/[workspaceId]/projects"
+  project: "/app/workspaces/[workspaceId]/projects/[projectId]"
+  project_view: "/app/workspaces/[workspaceId]/projects/[projectId]/views/[viewId]"
+  task: "/app/workspaces/[workspaceId]/projects/[projectId]/tasks/[taskId]"
+  settings: "/app/settings"
+  notifications: "/app/notifications"
+  search_results: "/app/search?q=[query]"
+  my_tasks:
+    root: "/app/my-tasks"
+    view: "/app/my-tasks/views/[viewId]"
 
 technical_requirements:
-  language: "JavaScript (React/Next.js), Python (Django/Flask) など"
-  database: "PostgreSQL, MySQL など"
+  language: "Typescript (React/Next.js)"
+  database: "PostgreSQL（Supabase）"
   authentication: "NextAuth.js (Google OAuth)"
-  deployment: "Vercel, AWS, Google Cloud, Heroku など"
-
-future_enhancements:
-  - ガントチャート表示
-  - カレンダー表示
-  - 他のツールとの連携 (Slack, Google Calendar など)
-  - モバイルアプリ対応
-  - ワークフロー機能の強化
+  deployment: "Vercel"

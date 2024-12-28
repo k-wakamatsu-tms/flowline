@@ -2,40 +2,22 @@ import { type ViewType } from "@/types/view";
 import { ViewLayout } from "@/components/view/view-layout";
 import { ViewContent } from "@/components/view/view-contents";
 import { api } from "@/trpc/server";
-import { redirect } from "next/navigation";
 
 interface Props {
-  params: {
-    workspaceId: string;
-    projectId: string;
-  };
   searchParams: {
     view?: ViewType;
   };
 }
 
-export default async function ProjectPage({ params, searchParams }: Props) {
-  const project = await api.projects.getById.query({
-    id: params.projectId,
-  });
+export default async function MyTasksPage({ searchParams }: Props) {
+  const tasks = await api.tasks.getMyTasks.query();
+  const settings = await api.myTasks.getSettings.query();
 
-  if (!project) {
-    redirect("/app");
-  }
-
-  const tasks = await api.tasks.getByProjectId.query({
-    projectId: params.projectId,
-  });
-
-  const defaultView = await api.projectViews.getDefault.query({
-    projectId: params.projectId,
-  });
-
-  const currentView = searchParams.view ?? defaultView?.type ?? "overview";
+  const currentView = searchParams.view ?? settings?.viewType ?? "list";
 
   return (
     <ViewLayout
-      title={project.name}
+      title="マイタスク"
       viewType={currentView}
       onViewTypeChange={(type) => {
         // クライアントサイドでの遷移は別途実装

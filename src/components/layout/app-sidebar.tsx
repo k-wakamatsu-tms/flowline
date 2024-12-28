@@ -1,36 +1,41 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { api } from "@/trpc/react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sidebar, SidebarFooter } from "@/components/ui/sidebar"
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { api } from "@/trpc/react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sidebar, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
 import {
   HomeIcon,
   FolderIcon,
   InboxIcon,
   BellIcon,
   CogIcon,
-} from "lucide-react"
-import { NavUser } from "./nav-user"
-import { useSession } from "next-auth/react"
+  CircleCheckBigIcon,
+} from "lucide-react";
+import { NavUser } from "./nav-user";
+import { useSession } from "next-auth/react";
+import WorkspaceSwitcher from "./workspace-switcher";
 
 export function AppSidebar() {
-  const pathname = usePathname()
-  const {data:session}=useSession()
-  const { data: workspaces } = api.workspace.list.useQuery()
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const { data: workspaces } = api.workspace.list.useQuery();
 
   if (!session) {
     return null;
   }
 
-  const user = session.user
+  const user = session.user;
 
   return (
     <Sidebar>
+      <SidebarHeader>
+        <WorkspaceSwitcher />
+      </SidebarHeader>
       <ScrollArea className="h-full">
         <div className="space-y-4 py-4">
           <div className="px-3 py-2">
@@ -44,9 +49,20 @@ export function AppSidebar() {
                   ホーム
                 </Button>
               </Link>
+              <Link href="">
+                <Button
+                  variant={pathname === "/app" ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                >
+                  <CircleCheckBigIcon className="mr-2 h-4 w-4" />
+                  マイタスク
+                </Button>
+              </Link>
               <Link href="/app/notifications">
                 <Button
-                  variant={pathname === "/app/notifications" ? "secondary" : "ghost"}
+                  variant={
+                    pathname === "/app/notifications" ? "secondary" : "ghost"
+                  }
                   className="w-full justify-start"
                 >
                   <BellIcon className="mr-2 h-4 w-4" />
@@ -83,12 +99,14 @@ export function AppSidebar() {
         </div>
       </ScrollArea>
       <SidebarFooter>
-        <NavUser user={{
-          name: user.name ?? "",
-          email: user.email ?? "",
-          image: user.image ?? "",
-        }} />
+        <NavUser
+          user={{
+            name: user.name ?? "",
+            email: user.email ?? "",
+            image: user.image ?? "",
+          }}
+        />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
