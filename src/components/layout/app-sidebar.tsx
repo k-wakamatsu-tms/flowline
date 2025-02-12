@@ -20,7 +20,7 @@ import { NavUser } from "./nav-user";
 import { useSession } from "next-auth/react";
 import WorkspaceSwitcher from "./workspace-switcher";
 
-export function AppSidebar() {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { data: workspaces } = api.workspace.list.useQuery();
@@ -32,7 +32,10 @@ export function AppSidebar() {
   const user = session.user;
 
   return (
-    <Sidebar>
+    <Sidebar
+      className="top-[--header-height] !h-[calc(100svh-var(--header-height))]"
+      {...props}
+    >
       <SidebarHeader>
         <WorkspaceSwitcher />
       </SidebarHeader>
